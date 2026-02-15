@@ -1,0 +1,64 @@
+# Tenant configuration (REQUIRED)
+tenant:
+  id: ""  # REQUIRED — alphanumeric tenant identifier for S3 paths, namespaces
+  name: ""  # REQUIRED — human-readable client name
+
+# Branding configuration
+branding:
+  appTitle: "Grafana"
+  appName: "Grafana"
+  loginTitle: "Sign in to Grafana"
+  logoUrl: ""  # Optional — triggers init container if set
+  cssOverrides: {}
+
+# Stack component toggles
+stack:
+  grafana:
+    enabled: true
+  loki:
+    enabled: false
+  mimir:
+    enabled: false
+  tempo:
+    enabled: false
+  pyroscope:
+    enabled: false
+
+# Retention policies (hours)
+retention:
+  loki: 720    # 30 days
+  mimir: 2160  # 90 days
+  tempo: 168   # 7 days
+  pyroscope: 168
+
+# SSO configuration (Google OAuth)
+sso:
+  enabled: false
+  google:
+    clientId: ""
+    clientSecret: ""
+    allowedDomains: ""
+
+# Content packs
+dashboards:
+  enabled: true  # Provision default dashboards
+
+alerts:
+  enabled: false  # Alert rules
+
+# Grafana subchart overrides
+grafana:
+  enabled: true
+  image:
+    repository: grafana/grafana-oss
+    tag: "10.4.0"
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
