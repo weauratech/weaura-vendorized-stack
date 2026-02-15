@@ -341,6 +341,26 @@ grafana_custom_folders = [
 - [Azure Complete](./examples/azure-complete/) - Full Azure deployment with all components
 - [Minimal](./examples/minimal/) - Grafana + Prometheus only
 
+## Vendorization Variables
+
+These variables are specific to WeAura's white-label distribution and enable tenant isolation, branding customization, and retention policy configuration for multi-tenant deployments.
+
+| Variable | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `tenant_id` | string | ✅ Yes | - | Unique tenant identifier (lowercase alphanumeric + hyphens only). Used for S3 bucket paths, namespace naming, IAM role naming. |
+| `tenant_name` | string | ✅ Yes | - | Human-readable tenant name (e.g., 'ACME Corporation'). Used for resource tagging and documentation. |
+| `branding_app_title` | string | ❌ No | `"Grafana"` | Grafana browser tab title and header title (grafana.ini: server.app_title). |
+| `branding_app_name` | string | ❌ No | `"Grafana"` | Grafana application name shown in UI (grafana.ini: server.app_name). |
+| `branding_login_title` | string | ❌ No | `"Welcome"` | Login page title text. |
+| `branding_logo_url` | string | ❌ No | `""` | URL to custom logo image (SVG/PNG/JPG). Empty string disables logo replacement. |
+| `branding_css_overrides` | string | ❌ No | `""` | Custom CSS overrides for additional branding. Empty string disables CSS customization. |
+| `retention_loki_hours` | number | ❌ No | `720` | Loki logs retention period in hours (default: 720 = 30 days). |
+| `retention_mimir_hours` | number | ❌ No | `2160` | Mimir metrics retention period in hours (default: 2160 = 90 days). |
+| `retention_tempo_hours` | number | ❌ No | `168` | Tempo traces retention period in hours (default: 168 = 7 days). |
+| `retention_pyroscope_hours` | number | ❌ No | `720` | Pyroscope profiles retention period in hours (default: 720 = 30 days). |
+| `secrets_provider` | string | ❌ No | `"kubernetes"` | Secrets management provider: 'kubernetes' (plain Secrets) or 'external-secrets' (External Secrets Operator). |
+| `database_type` | string | ❌ No | `"sqlite"` | Grafana database type: 'sqlite' (default, single-pod only) or 'postgres' (required for HA). |
+
 ## Requirements
 
 | Name       | Version  |
