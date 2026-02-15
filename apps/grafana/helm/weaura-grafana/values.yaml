@@ -62,3 +62,6 @@ grafana:
     limits:
       cpu: 500m
       memory: 512Mi
+  extraConfigmapMounts: []
+    # ConfigMap mounts are managed dynamically by templates
+    # See templates/configmap-*.yaml for mount definitions
