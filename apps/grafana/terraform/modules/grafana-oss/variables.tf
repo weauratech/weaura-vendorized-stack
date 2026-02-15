@@ -6,6 +6,113 @@
 # ============================================================
 
 # ============================================================
+# VENDORIZATION VARIABLES (WeAura White-Label Distribution)
+# ============================================================
+# These variables enable tenant isolation, branding customization,
+# and retention policy configuration for multi-tenant deployments.
+# ============================================================
+
+# Tenant Identification - REQUIRED
+variable "tenant_id" {
+  description = "Unique tenant identifier (lowercase alphanumeric + hyphens only). Used for S3 bucket paths, namespace naming, IAM role naming."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[a-z0-9-]+$", var.tenant_id))
+    error_message = "tenant_id must be lowercase alphanumeric with hyphens only (e.g., 'acme-corp', 'client-123')."
+  }
+}
+
+variable "tenant_name" {
+  description = "Human-readable tenant name (e.g., 'ACME Corporation'). Used for resource tagging and documentation."
+  type        = string
+
+  validation {
+    condition     = length(var.tenant_name) > 0 && length(var.tenant_name) <= 100
+    error_message = "tenant_name must be between 1 and 100 characters."
+  }
+}
+
+# Branding Variables - OPTIONAL
+variable "branding_app_title" {
+  description = "Grafana browser tab title and header title (grafana.ini: server.app_title)."
+  type        = string
+  default     = "Grafana"
+}
+
+variable "branding_app_name" {
+  description = "Grafana application name shown in UI (grafana.ini: server.app_name)."
+  type        = string
+  default     = "Grafana"
+}
+
+variable "branding_login_title" {
+  description = "Login page title text."
+  type        = string
+  default     = "Welcome"
+}
+
+variable "branding_logo_url" {
+  description = "URL to custom logo image (SVG/PNG/JPG). Empty string disables logo replacement."
+  type        = string
+  default     = ""
+}
+
+variable "branding_css_overrides" {
+  description = "Custom CSS overrides for additional branding. Empty string disables CSS customization."
+  type        = string
+  default     = ""
+}
+
+# Retention Policy Variables - OPTIONAL (all in hours)
+variable "retention_loki_hours" {
+  description = "Loki logs retention period in hours (default: 720 = 30 days)."
+  type        = number
+  default     = 720
+}
+
+variable "retention_mimir_hours" {
+  description = "Mimir metrics retention period in hours (default: 2160 = 90 days)."
+  type        = number
+  default     = 2160
+}
+
+variable "retention_tempo_hours" {
+  description = "Tempo traces retention period in hours (default: 168 = 7 days)."
+  type        = number
+  default     = 168
+}
+
+variable "retention_pyroscope_hours" {
+  description = "Pyroscope profiles retention period in hours (default: 720 = 30 days)."
+  type        = number
+  default     = 720
+}
+
+# Infrastructure Configuration - OPTIONAL
+variable "secrets_provider" {
+  description = "Secrets management provider: 'kubernetes' (plain Secrets) or 'external-secrets' (External Secrets Operator)."
+  type        = string
+  default     = "kubernetes"
+
+  validation {
+    condition     = contains(["kubernetes", "external-secrets"], var.secrets_provider)
+    error_message = "secrets_provider must be 'kubernetes' or 'external-secrets'."
+  }
+}
+
+variable "database_type" {
+  description = "Grafana database type: 'sqlite' (default, single-pod only) or 'postgres' (required for HA)."
+  type        = string
+  default     = "sqlite"
+
+  validation {
+    condition     = contains(["sqlite", "postgres"], var.database_type)
+    error_message = "database_type must be 'sqlite' or 'postgres'."
+  }
+}
+
+# ============================================================
 # CLOUD PROVIDER SELECTION
 # ============================================================
 

@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "weaura-grafana.fullname" . }}-grafana-ini
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "weaura-grafana.labels" . | nindent 4 }}
+    app.kubernetes.io/component: config
+data:
+  grafana.ini: |
+    [server]
+    root_url = %(protocol)s://%(domain)s/
+    serve_from_sub_path = true
+    
+    [security]
+    admin_user = admin
+    secret_key = {{ randAlphaNum 32 }}
+    
+    [branding]
+    app_title = {{ .Values.branding.appTitle | quote }}
+    app_name = {{ .Values.branding.appName | quote }}
+    login_title = {{ .Values.branding.loginTitle | quote }}
+    {{- if .Values.branding.logoUrl }}
+    logo_url = {{ .Values.branding.logoUrl | quote }}
+    {{- end }}
+    
+    [auth]
+    {{- if .Values.sso.enabled }}
+    {{- if .Values.sso.google.clientId }}
+    oauth_auto_login = true
+    {{- end }}
+    {{- end }}
+    
+    {{- if and .Values.sso.enabled .Values.sso.google.clientId }}
+    [auth.google]
+    enabled = true
+    client_id = {{ .Values.sso.google.clientId | quote }}
+    client_secret = {{ .Values.sso.google.clientSecret | quote }}
+    scopes = openid profile email
+    auth_url = https://accounts.google.com/o/oauth2/v2/auth
+    token_url = https://oauth2.googleapis.com/token
+    api_url = https://www.googleapis.com/oauth2/v1/userinfo
+    {{- if .Values.sso.google.allowedDomains }}
+    allowed_domains = {{ .Values.sso.google.allowedDomains | quote }}
+    {{- end }}
+    {{- end }}
+    
+    [users]
+    auto_assign_org_role = Viewer
+    
+    [security.encryption]
+    encryption_provider = noop
