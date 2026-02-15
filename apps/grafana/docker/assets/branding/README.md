@@ -182,13 +182,44 @@ Conditional initialization:
 
 ### Script Location and Implementation
 
-The script `apps/grafana/docker/scripts/apply-branding.sh` handles:
-- Downloading logo from URL with retry logic
-- Validating SVG format
-- Replacing default Grafana SVG
-- Handling errors gracefully
+The script `apps/grafana/docker/scripts/apply-branding.sh` (executable bash script, ~100 lines) handles:
 
-*Note: Script creation is Task 4b. This documentation defines the pattern.*
+**Features**:
+- Reads `LOGO_URL` environment variable (optional)
+- Exits gracefully (exit 0) with skip message if `LOGO_URL` is empty/unset
+- Downloads logo using `curl` or `wget` (auto-detects available tool)
+- Implements retry logic with configurable retry count and delay
+- Detects file type from HTTP `Content-Type` header or file extension
+- Automatically converts non-SVG formats to SVG using ImageMagick (if available)
+- Replaces `/usr/share/grafana/public/img/grafana_icon.svg` with downloaded logo
+- Backs up original logo before replacement
+- Validates replacement and logs all actions to stdout (container logs)
+- Implements error handling: exits non-zero only if download fails after retries
+
+**Environment Variables**:
+- `LOGO_URL` (optional): URL to download logo from. If empty, script skips and exits 0.
+- `LOGO_PATH` (optional, default: `/usr/share/grafana/public/img/grafana_icon.svg`): Target file path
+- `RETRY_COUNT` (optional, default: 3): Number of download retry attempts
+- `RETRY_DELAY` (optional, default: 5): Seconds to wait between retries
+
+**Script Behavior**:
+```bash
+# Skip if LOGO_URL not set (normal, not an error)
+LOGO_URL="" bash apply-branding.sh
+# Output: [Branding] LOGO_URL not set, skipping logo replacement
+# Exit code: 0
+
+# Download and replace logo
+LOGO_URL="https://example.com/logo.svg" bash apply-branding.sh
+# Output: [Branding] Downloaded logo from https://example.com/logo.svg
+#         [Branding] Successfully replaced logo at /usr/share/grafana/public/img/grafana_icon.svg
+# Exit code: 0
+
+# Download fails after retries (error)
+LOGO_URL="https://invalid-domain.example.com/logo.svg" bash apply-branding.sh
+# Output: [Branding] ERROR: Failed to download logo after 3 attempts
+# Exit code: 1
+```
 
 ### Helm Template Pattern (Conditional InitContainer)
 
@@ -197,47 +228,190 @@ spec:
   initContainers:
     {{- if .Values.branding.logoUrl }}
     - name: apply-branding
-      image: curlimages/curl:latest
-      command:
-        - /bin/sh
-        - -c
-        - |
-          set -e
-          echo "Downloading logo from {{ .Values.branding.logoUrl }}"
-          curl -fsSL -o /branding-output/logo.svg "{{ .Values.branding.logoUrl }}"
-          echo "Logo downloaded successfully"
+      image: 950242546328.dkr.ecr.us-east-2.amazonaws.com/weaura-grafana:latest
+      command: ["/scripts/apply-branding.sh"]
+      env:
+        - name: LOGO_URL
+          value: "{{ .Values.branding.logoUrl }}"
+        - name: LOGO_PATH
+          value: "/usr/share/grafana/public/img/grafana_icon.svg"
+        - name: RETRY_COUNT
+          value: "3"
+        - name: RETRY_DELAY
+          value: "5"
       volumeMounts:
-        - name: grafana-storage
-          mountPath: /branding-output
+        - name: grafana-public
+          mountPath: /usr/share/grafana/public
     {{- end }}
   containers:
     - name: grafana
       image: grafana/grafana:latest
       volumeMounts:
-        - name: grafana-storage
-          mountPath: /usr/share/grafana/public/img
+        - name: grafana-public
+          mountPath: /usr/share/grafana/public
   volumes:
-    - name: grafana-storage
+    - name: grafana-public
       emptyDir: {}
 ```
 
-### Environment Variables for Init Container
-
-```yaml
-initContainers:
-  - name: apply-branding
-    env:
-      - name: LOGO_URL
-        value: "{{ .Values.branding.logoUrl }}"
-      - name: LOGO_PATH
-        value: "/usr/share/grafana/public/img/grafana_icon.svg"
-      - name: RETRY_COUNT
-        value: "3"
-      - name: RETRY_DELAY
-        value: "5"
-```
+**Key Points**:
+- `{{- if .Values.branding.logoUrl }}` makes init container conditional (only runs if logo URL is configured)
+- Init container must be part of the Grafana image OR a separate image with curl/wget pre-installed
+- Script exits 0 if `LOGO_URL` is unset, so it's safe to always run if using conditional check above
+- `emptyDir` volume allows the init container to write the logo before Grafana starts
+- Both init and main container must mount the same `grafana-public` volume
 
 ---
+
+## 4b. Layer 3 Implementation: Init Container Script
+
+### Script Overview
+
+File: `apps/grafana/docker/scripts/apply-branding.sh` (executable, bash)
+
+This is the actual implementation of Layer 3. The script is designed to run as an init container in Kubernetes, downloading a logo from a URL and replacing Grafana's default logo before Grafana starts up.
+
+### How to Use in Docker Image
+
+To include this script in your Grafana Docker image:
+
+```dockerfile
+# Dockerfile
+FROM grafana/grafana:latest
+
+# Copy branding script
+COPY apps/grafana/docker/scripts/apply-branding.sh /scripts/apply-branding.sh
+RUN chmod +x /scripts/apply-branding.sh
+
+# Ensure standard tools are available
+RUN apt-get update && apt-get install -y curl wget && rm -rf /var/lib/apt/lists/*
+```
+
+Or use a separate init container image:
+
+```dockerfile
+# Init container Dockerfile (minimal image)
+FROM curlimages/curl:latest
+COPY apps/grafana/docker/scripts/apply-branding.sh /scripts/apply-branding.sh
+RUN chmod +x /scripts/apply-branding.sh
+ENTRYPOINT ["/scripts/apply-branding.sh"]
+```
+
+### Installation in Kubernetes (Manual)
+
+If your Grafana image already has the script, define an init container in your Deployment:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: apply-branding
+          image: grafana/grafana:latest  # If script is in image
+          command: ["/scripts/apply-branding.sh"]
+          env:
+            - name: LOGO_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: grafana-branding
+                  key: logo-url
+            - name: RETRY_COUNT
+              value: "3"
+          volumeMounts:
+            - name: grafana-public
+              mountPath: /usr/share/grafana/public
+      
+      containers:
+        - name: grafana
+          image: grafana/grafana:latest
+          volumeMounts:
+            - name: grafana-public
+              mountPath: /usr/share/grafana/public
+      
+      volumes:
+        - name: grafana-public
+          emptyDir: {}
+```
+
+### Testing the Script Locally
+
+```bash
+# Test 1: Verify syntax
+bash -n apps/grafana/docker/scripts/apply-branding.sh
+
+# Test 2: Test skip behavior (no LOGO_URL)
+LOGO_URL="" bash apps/grafana/docker/scripts/apply-branding.sh
+# Expected: "[Branding] LOGO_URL not set, skipping logo replacement"
+# Expected exit code: 0
+
+# Test 3: Test with a real URL (if available)
+LOGO_URL="https://example.com/logo.svg" bash apps/grafana/docker/scripts/apply-branding.sh
+
+# Test 4: Test with invalid URL (should retry and fail)
+LOGO_URL="https://invalid-domain-example.invalid/logo.svg" \
+  RETRY_COUNT="2" RETRY_DELAY="1" \
+  bash apps/grafana/docker/scripts/apply-branding.sh
+# Expected exit code: 1 (after retries)
+```
+
+### Common Scenarios
+
+**Scenario 1: Logo from CDN (Public URL)**
+```yaml
+env:
+  - name: LOGO_URL
+    value: "https://cdn.example.com/logo.svg"
+```
+Script will download directly from the CDN and replace the logo.
+
+**Scenario 2: Logo from Private Repository (Requires Auth)**
+```yaml
+env:
+  - name: LOGO_URL
+    value: "https://artifacts.example.com/logos/private-logo.svg?token=abc123"
+```
+Script uses curl/wget to download; both support query parameters and HTTP auth.
+
+**Scenario 3: No Logo Customization (Default Grafana Logo)**
+```yaml
+env:
+  - name: LOGO_URL
+    value: ""  # Empty or omitted
+```
+Script skips logo replacement, Grafana uses its default logo.
+
+**Scenario 4: Logo Conversion (PNG → SVG)**
+```yaml
+env:
+  - name: LOGO_URL
+    value: "https://example.com/logo.png"
+```
+If ImageMagick (`convert` command) is available in the init container, script automatically converts PNG to SVG. Otherwise, logs a warning but continues with the PNG file.
+
+### Troubleshooting
+
+| Issue | Diagnosis | Solution |
+|-------|-----------|----------|
+| Logo not replaced | Check init container logs: `kubectl logs <pod> -c apply-branding` | Verify `LOGO_URL` is set and accessible; check network/auth |
+| "curl: command not found" | Init container doesn't have curl/wget | Use an image with curl/wget (e.g., `curlimages/curl`) or add to Grafana image |
+| Download fails after retries | Network issue or URL invalid | Verify URL is correct and accessible from pod; increase RETRY_DELAY |
+| "ImageMagick not available" | PNG/JPG format but no convert tool | Install ImageMagick in image (`apt-get install imagemagick`) or use SVG format |
+| Logo file too large | Memory/disk issue | Ensure `emptyDir` volume has enough space; check pod resource limits |
+
+---
+
+## Original Helm Template Pattern
+
+The following Helm template is a simpler example that uses a separate curl image:
+
+
+
+
+
 
 ## 5. OSS Limitations
 
