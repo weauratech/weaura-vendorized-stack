@@ -68,6 +68,23 @@ Example deployments showing end-to-end setup for customer environments
 ### `.github/workflows/`
 GitHub Actions for CI/CD (linting, testing, deployment workflows)
 
+## Documentation
+
+### Grafana Deployment Guides
+
+Get started with WeAura-vendorized Grafana:
+
+- **[Quickstart Guide](apps/grafana/docs/quickstart.md)** — Get Grafana running in 30 minutes (Helm or Terraform)
+- **[Configuration Reference](apps/grafana/docs/configuration.md)** — Complete guide to all configuration options
+- **[Upgrade Guide](apps/grafana/docs/upgrade-guide.md)** — Safe upgrade procedures and rollback strategies
+
+### Quick Links
+
+- **Helm Chart**: `apps/grafana/helm/weaura-grafana/`
+- **Terraform Module**: `apps/grafana/terraform/modules/grafana-oss/`
+- **Example Profiles**: `examples/grafana/`
+- **Content Packs**: `apps/grafana/content-packs/` (dashboards, alerts)
+
 ## Development & Deployment
 
 Each application follows this workflow:

@@ -410,9 +410,6 @@ The following Helm template is a simpler example that uses a separate curl image
 
 
 
-
-
-
 ## 5. OSS Limitations
 
 ### What Can't Be Done (Enterprise Only)
