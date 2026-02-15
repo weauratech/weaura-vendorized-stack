@@ -1,0 +1,26 @@
+# AWS Complete Example - terraform.tfvars.example
+# Copy this file to terraform.tfvars and fill in your values
+
+# AWS Configuration
+aws_region       = "us-east-1"
+eks_cluster_name = "my-eks-cluster"
+
+# OIDC Provider (from EKS)
+# Get with: aws eks describe-cluster --name <cluster> --query "cluster.identity.oidc.issuer"
+eks_oidc_provider_arn = "arn:aws:iam::123456789012:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/EXAMPLED539D4633E53DE1B716D3041E"
+eks_oidc_provider_url = "https://oidc.eks.us-east-1.amazonaws.com/id/EXAMPLED539D4633E53DE1B716D3041E"
+
+# Environment
+environment = "production"
+project     = "observability"
+
+# Grafana
+grafana_domain         = "grafana.example.com"
+grafana_admin_password = "change-me-to-a-strong-password"
+
+# Slack Webhooks (optional)
+# Replace with your actual Slack webhook URLs
+slack_webhook_general        = "YOUR_SLACK_WEBHOOK_URL_GENERAL"
+slack_webhook_critical       = "YOUR_SLACK_WEBHOOK_URL_CRITICAL"
+slack_webhook_infrastructure = "YOUR_SLACK_WEBHOOK_URL_INFRASTRUCTURE"
+slack_webhook_application    = "YOUR_SLACK_WEBHOOK_URL_APPLICATION"

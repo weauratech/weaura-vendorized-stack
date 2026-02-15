@@ -1,0 +1,26 @@
+# Azure Complete Example - terraform.tfvars.example
+# Copy this file to terraform.tfvars and fill in your values
+
+# Azure Configuration
+azure_subscription_id     = "12345678-1234-1234-1234-123456789abc"
+azure_tenant_id           = "12345678-1234-1234-1234-123456789abc"
+azure_resource_group_name = "rg-observability"
+azure_location            = "eastus"
+
+# AKS Configuration
+aks_cluster_name    = "my-aks-cluster"
+aks_oidc_issuer_url = "https://eastus.oic.prod-aks.azure.com/12345678-1234-1234-1234-123456789abc/12345678-1234-1234-1234-123456789abc/"
+
+# Environment
+environment = "production"
+project     = "observability"
+
+# Grafana
+grafana_domain         = "grafana.example.com"
+grafana_admin_password = "change-me-to-a-strong-password"
+
+# Microsoft Teams Webhooks (optional)
+teams_webhook_general        = "https://outlook.office.com/webhook/xxx/IncomingWebhook/xxx/xxx"
+teams_webhook_critical       = "https://outlook.office.com/webhook/xxx/IncomingWebhook/xxx/xxx"
+teams_webhook_infrastructure = "https://outlook.office.com/webhook/xxx/IncomingWebhook/xxx/xxx"
+teams_webhook_application    = "https://outlook.office.com/webhook/xxx/IncomingWebhook/xxx/xxx"
