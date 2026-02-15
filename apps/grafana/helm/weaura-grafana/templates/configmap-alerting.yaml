@@ -1,0 +1,19 @@
+{{- if .Values.alerts.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "weaura-grafana.fullname" . }}-alerting
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "weaura-grafana.labels" . | nindent 4 }}
+    app.kubernetes.io/component: alerting
+data:
+  high-cpu.yaml: |-
+    {{ .Files.Get "content-packs/alerts/high-cpu.yaml" | nindent 4 }}
+  high-error-rate.yaml: |-
+    {{ .Files.Get "content-packs/alerts/high-error-rate.yaml" | nindent 4 }}
+  disk-space.yaml: |-
+    {{ .Files.Get "content-packs/alerts/disk-space.yaml" | nindent 4 }}
+  pod-crash-loop.yaml: |-
+    {{ .Files.Get "content-packs/alerts/pod-crash-loop.yaml" | nindent 4 }}
+{{- end }}
