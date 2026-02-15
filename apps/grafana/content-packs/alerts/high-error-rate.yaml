@@ -1,0 +1,58 @@
+apiVersion: 1
+groups:
+  - name: application-alerts
+    interval: 1m
+    rules:
+      - uid: weaura-high-error-rate
+        title: High HTTP Error Rate
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS}
+            model:
+              expr: (sum(rate(http_requests_total{status_code=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))) * 100
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              refId: B
+              expression: A
+              reducer: mean
+              settings:
+                mode: replaceNonNumericValues
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              refId: C
+              expression: B
+              conditions:
+                - evaluator:
+                    params:
+                      - 5
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  type: query
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: High HTTP 5xx error rate
+          description: "Application {{ $labels.service }} has 5xx error rate above 5% (current value: {{ $value }}%)"
+        labels:
+          severity: critical
+          team: platform
