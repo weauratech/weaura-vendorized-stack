@@ -1,0 +1,19 @@
+{{- if .Values.dashboards.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "weaura-grafana.fullname" . }}-dashboards
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "weaura-grafana.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dashboards
+data:
+  kubernetes-overview.json: |-
+    {{ .Files.Get "content-packs/dashboards/kubernetes-overview.json" | nindent 4 }}
+  application-overview.json: |-
+    {{ .Files.Get "content-packs/dashboards/application-overview.json" | nindent 4 }}
+  loki-logs.json: |-
+    {{ .Files.Get "content-packs/dashboards/loki-logs.json" | nindent 4 }}
+  node-exporter.json: |-
+    {{ .Files.Get "content-packs/dashboards/node-exporter.json" | nindent 4 }}
+{{- end }}
