@@ -7,6 +7,9 @@ metadata:
   labels:
     {{- include "weaura-grafana.labels" . | nindent 4 }}
     app.kubernetes.io/component: dashboards
+    grafana_dashboard: "1"
+  annotations:
+    {{- include "weaura-grafana.annotations" . | nindent 4 }}
 data:
   kubernetes-overview.json: |-
     {{ .Files.Get "content-packs/dashboards/kubernetes-overview.json" | nindent 4 }}

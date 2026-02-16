@@ -7,6 +7,8 @@ metadata:
   labels:
     {{- include "weaura-grafana.labels" . | nindent 4 }}
     app.kubernetes.io/component: alerting
+  annotations:
+    {{- include "weaura-grafana.annotations" . | nindent 4 }}
 data:
   high-cpu.yaml: |-
     {{ .Files.Get "content-packs/alerts/high-cpu.yaml" | nindent 4 }}

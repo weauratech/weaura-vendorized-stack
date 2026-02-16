@@ -7,6 +7,8 @@ metadata:
   labels:
     {{- include "weaura-grafana.labels" . | nindent 4 }}
     app.kubernetes.io/component: branding
+  annotations:
+    {{- include "weaura-grafana.annotations" . | nindent 4 }}
 data:
   custom.css: |
     {{ .Values.branding.cssOverrides | indent 4 }}

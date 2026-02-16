@@ -62,6 +62,29 @@ grafana:
     limits:
       cpu: 500m
       memory: 512Mi
-  extraConfigmapMounts: []
-    # ConfigMap mounts are managed dynamically by templates
-    # See templates/configmap-*.yaml for mount definitions
+  
+  grafana.ini:
+    server:
+      root_url: "%(protocol)s://%(domain)s:%(http_port)s/"
+  
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          url: http://prometheus:9090
+          isDefault: true
+          editable: false
+  
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      folder: /tmp/dashboards
+      searchNamespace: ALL
+    alerts:
+      enabled: false
+

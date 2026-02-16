@@ -39,6 +39,12 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 tenant.weaura.io/id: {{ .Values.tenant.id | quote }}
+{{- end }}
+
+{{/*
+Common annotations (includes tenant.name which may contain spaces)
+*/}}
+{{- define "weaura-grafana.annotations" -}}
 tenant.weaura.io/name: {{ .Values.tenant.name | quote }}
 {{- end }}
 

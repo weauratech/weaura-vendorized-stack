@@ -1,0 +1,40 @@
+# Minimal configuration example for weaura-grafana Helm chart
+# This demonstrates the simplest possible deployment with ACME Corporation branding
+
+# Tenant identification (required)
+tenant:
+  id: acme-corp
+  name: "ACME Corporation"
+
+# Branding configuration (optional)
+branding:
+  logo:
+    enabled: true
+    type: url
+    url: "https://acme.example.com/logo.png"
+
+# Grafana subchart configuration
+grafana:
+  # Admin credentials
+  adminUser: admin
+  adminPassword: admin123
+  
+  # Disable persistence for Docker Desktop testing
+  persistence:
+    enabled: false
+  
+  # Service configuration
+  service:
+    type: NodePort
+    nodePort: 30300
+
+# Content packs
+dashboards:
+  enabled: true
+
+alerts:
+  enabled: false
+
+# SSO (disabled for minimal example)
+sso:
+  enabled: false
