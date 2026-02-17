@@ -3,7 +3,29 @@ entries:
   weaura-grafana:
   - apiVersion: v2
     appVersion: 10.4.0
-    created: "2026-02-17T10:35:46.543076-03:00"
+    created: "2026-02-17T13:14:30.57247-03:00"
+    dependencies:
+    - condition: grafana.enabled
+      name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: ~7.3.0
+    - condition: prometheus.enabled
+      name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: ~25.0.0
+    description: WeAura vendorized Grafana OSS wrapper chart with tenant isolation
+    digest: 5b39c5529d26dcf6114c2dab5ea478a62c0b797d846d549460c1f11eb0ec98a6
+    maintainers:
+    - email: tech@weaura.com
+      name: WeAura Tech Team
+    name: weaura-grafana
+    type: application
+    urls:
+    - https://weauratech.github.io/weaura-vendorized-stack/helm-repo/weaura-grafana-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
+    appVersion: 10.4.0
+    created: "2026-02-17T13:14:30.567316-03:00"
     dependencies:
     - condition: grafana.enabled
       name: grafana
@@ -19,4 +41,4 @@ entries:
     urls:
     - https://weauratech.github.io/weaura-vendorized-stack/helm-repo/weaura-grafana-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-17T10:35:46.540871-03:00"
+generated: "2026-02-17T13:14:30.563147-03:00"

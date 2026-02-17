@@ -2,7 +2,7 @@ apiVersion: v2
 name: weaura-grafana
 description: WeAura vendorized Grafana OSS wrapper chart with tenant isolation
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: "10.4.0"
 maintainers:
   - name: WeAura Tech Team
@@ -12,3 +12,7 @@ dependencies:
     version: "~7.3.0"
     repository: https://grafana.github.io/helm-charts
     condition: grafana.enabled
+  - name: prometheus
+    version: "~25.0.0"
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: prometheus.enabled

@@ -74,7 +74,7 @@ grafana:
         - name: Prometheus
           type: prometheus
           access: proxy
-          url: http://prometheus:9090
+          url: http://{{ .Release.Name }}-prometheus-server
           isDefault: true
           editable: false
   
@@ -88,3 +88,33 @@ grafana:
     alerts:
       enabled: false
 
+# Prometheus subchart overrides
+prometheus:
+  enabled: true
+  
+  alertmanager:
+    enabled: false
+  
+  kube-state-metrics:
+    enabled: true
+  
+  prometheus-node-exporter:
+    enabled: true
+  
+  prometheus-pushgateway:
+    enabled: false
+  
+  server:
+    persistentVolume:
+      enabled: true
+      size: 20Gi
+    
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    
+    retention: "15d"
