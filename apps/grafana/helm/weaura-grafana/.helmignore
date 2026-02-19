@@ -6,13 +6,9 @@
 .gitignore
 .gitattributes
 
-# Documentation
-*.md
-!README.md
-*.MD
-README*
-CHANGELOG*
-LICENSE*
+# Documentation (exclude specific files, allow README.md)
+CHANGELOG.md
+LICENSE.md
 docs/
 
 # CI/CD and automation
