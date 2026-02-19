@@ -126,8 +126,10 @@ jobs:
           # GitHub Secrets required:
           # - HARBOR_USERNAME: Harbor robot account or user with push permissions
           # - HARBOR_PASSWORD: Harbor password or robot account token
+          # Using single quotes to prevent bash from interpreting $ in the username
+          USERNAME='${{ secrets.HARBOR_USERNAME }}'
           echo "${{ secrets.HARBOR_PASSWORD }}" | helm registry login registry.dev.weaura.ai \
-            --username "${{ secrets.HARBOR_USERNAME }}" \
+            --username "${USERNAME}" \
             --password-stdin
 
       - name: Push chart to Harbor
