@@ -6,6 +6,18 @@ Monorepo for WeAura vendorized stack infrastructure (Grafana, Rancher, Metabase,
 
 This repository contains production-ready infrastructure configurations for vendorized stack applications deployed across customer environments. It's designed as a scalable monorepo where each application has its own subdirectory under `apps/`, allowing for independent versioning, deployment, and configuration management.
 
+## Chart Distribution
+
+All Helm charts are distributed via **Harbor OCI** at `registry.dev.weaura.ai`. 
+
+**For clients:**
+- Charts are distributed as OCI artifacts (not traditional Helm repositories)
+- Authenticate with: `helm registry login registry.dev.weaura.ai`
+- Install charts using `oci://` references (e.g., `oci://registry.dev.weaura.ai/weaura-vendorized/weaura-grafana:latest`)
+- Robot account credentials are provided by WeAura during onboarding
+
+See [Client Onboarding](#client-onboarding) below for step-by-step setup instructions.
+
 ## Repository Structure
 
 ```
@@ -77,6 +89,31 @@ Get started with WeAura-vendorized Grafana:
 - **[Quickstart Guide](apps/grafana/docs/quickstart.md)** — Get Grafana running in 30 minutes (Helm or Terraform)
 - **[Configuration Reference](apps/grafana/docs/configuration.md)** — Complete guide to all configuration options
 - **[Upgrade Guide](apps/grafana/docs/upgrade-guide.md)** — Safe upgrade procedures and rollback strategies
+- **[Client Onboarding Guide](apps/grafana/docs/guia-cliente.md)** — Portuguese guide for client setup and usage
+
+### Client Onboarding
+
+To onboard a new client to WeAura-vendorized charts:
+
+1. **Create Robot Account**: WeAura admin creates a robot account in Harbor project `weaura-vendorized` via the Harbor UI (https://registry.dev.weaura.ai)
+   
+2. **Provide Credentials**: Client receives username and password (or token) for the robot account
+   
+3. **Authenticate**: Client runs:
+   ```bash
+   helm registry login registry.dev.weaura.ai
+   # Enter username and password when prompted
+   ```
+   
+4. **Pull Charts**: Client can now pull and install charts using OCI references:
+   ```bash
+   helm pull oci://registry.dev.weaura.ai/weaura-vendorized/weaura-grafana --version latest
+   helm install my-grafana oci://registry.dev.weaura.ai/weaura-vendorized/weaura-grafana --values values.yaml
+   ```
+   
+5. **Ongoing Access**: Robot account credentials persist until revoked by WeAura admin
+
+**Note**: Robot account creation is currently a manual process performed by WeAura administrators via the Harbor UI.
 
 ### Quick Links
 
@@ -84,6 +121,7 @@ Get started with WeAura-vendorized Grafana:
 - **Terraform Module**: `apps/grafana/terraform/modules/grafana-oss/`
 - **Example Profiles**: `examples/grafana/`
 - **Content Packs**: `apps/grafana/content-packs/` (dashboards, alerts)
+- **Registry**: `oci://registry.dev.weaura.ai/weaura-vendorized/`
 
 ## Development & Deployment
 

@@ -1,6 +1,6 @@
 # Guia do Cliente - WeAura Grafana Vendor
 
-**Versão**: 0.1.0  
+**Versão**: 0.2.0  
 **Atualizado**: 16 Fev 2026
 
 ## Pré-requisitos
@@ -11,6 +11,7 @@ Antes de instalar o vendor Grafana, você precisa ter:
 - **Helm 3** (versão 3.8+)
 - **kubectl** configurado para seu cluster
 - **Namespace** criado para a instalação
+- **Harbor credentials** para acessar o registro de imagens WeAura (fornecidas pela equipe WeAura)
 
 Verifique os requisitos:
 
@@ -29,13 +30,16 @@ kubectl get namespace grafana || kubectl create namespace grafana
 
 ## Instalação Básica (5 minutos)
 
-### Passo 1: Adicionar o repositório Helm
+### Passo 1: Fazer login no registro Harbor
 
 ```bash
-# Adicionar o repositório WeAura (ajuste a URL conforme necessário)
-helm repo add weaura https://charts.weaura.tech
-helm repo update
+# Fazer login no Harbor (use credenciais fornecidas pela WeAura)
+helm registry login registry.dev.weaura.ai
 ```
+
+Quando solicitado:
+- **Username**: (fornecido pela WeAura)
+- **Password**: (fornecido pela WeAura)
 
 ### Passo 2: Criar arquivo de configuração mínimo
 
@@ -60,9 +64,10 @@ branding:
 ### Passo 3: Instalar o chart
 
 ```bash
-helm install grafana weaura/weaura-grafana \
+helm install grafana oci://registry.dev.weaura.ai/weaura-vendorized/weaura-grafana \
   --namespace grafana \
   --values values.yaml \
+  --version 0.2.0 \
   --wait
 ```
 
@@ -285,9 +290,10 @@ kubectl exec -n grafana deployment/grafana -- curl -s http://localhost:3000/api/
 vim values.yaml
 
 # Aplicar mudanças (upgrade)
-helm upgrade grafana weaura/weaura-grafana \
+helm upgrade grafana oci://registry.dev.weaura.ai/weaura-vendorized/weaura-grafana \
   --namespace grafana \
   --values values.yaml \
+  --version 0.2.0 \
   --wait
 
 # Verificar se aplicou

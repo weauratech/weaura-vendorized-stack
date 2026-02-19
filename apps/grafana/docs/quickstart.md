@@ -12,6 +12,7 @@ Before deploying, ensure you have:
 - **AWS CLI** (v2) — If deploying to AWS with S3 backend (optional)
 - **Kubernetes cluster** — EKS, AKS, or self-managed (v1.25+)
 - **Cluster admin access** — To create namespaces and install Helm charts
+- **Harbor credentials** — For accessing vendorized charts at `registry.dev.weaura.ai` (WeAura will provide robot account credentials)
 
 Verify prerequisites:
 
@@ -26,14 +27,15 @@ aws --version  # Only if using AWS
 
 Deploy Grafana only (no observability stack) using Helm. Best for evaluating Grafana functionality.
 
-### Step 1: Add Helm Repository (if using published charts)
+### Step 1: Configure Harbor Registry Access
 
 ```bash
-helm repo add weaura https://charts.weaura.io  # Will be available after release
-helm repo update
+# Login to Harbor registry with WeAura credentials
+helm registry login registry.dev.weaura.ai
+# When prompted, enter the robot account username and password provided by WeAura
 ```
 
-Or use local chart:
+Or use local chart for development:
 
 ```bash
 cd weaura-vendorized-stack
@@ -49,7 +51,8 @@ kubectl create namespace acme-corp-observability
 ### Step 3: Deploy Grafana
 
 ```bash
-helm install weaura-grafana ./apps/grafana/helm/weaura-grafana/ \
+helm install weaura-grafana oci://registry.dev.weaura.ai/weaura-vendorized/weaura-grafana \
+  --version 0.2.0 \
   --namespace acme-corp-observability \
   --set tenant.id=acme-corp \
   --set tenant.name="ACME Corporation" \
@@ -59,7 +62,8 @@ helm install weaura-grafana ./apps/grafana/helm/weaura-grafana/ \
 Or use example values file:
 
 ```bash
-helm install weaura-grafana ./apps/grafana/helm/weaura-grafana/ \
+helm install weaura-grafana oci://registry.dev.weaura.ai/weaura-vendorized/weaura-grafana \
+  --version 0.2.0 \
   --namespace acme-corp-observability \
   --values examples/grafana/minimal.yaml
 ```
