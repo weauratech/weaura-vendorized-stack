@@ -1,0 +1,56 @@
+# Helm ignore file for weaura-grafana chart
+# Prevents non-chart files from being included in helm package output
+
+# Git metadata
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+*.MD
+README*
+CHANGELOG*
+LICENSE*
+docs/
+
+# CI/CD and automation
+ci/
+.github/
+.gitlab-ci.yml
+.circleci/
+
+# Development and container files
+docker/
+Dockerfile
+Makefile
+.env
+.env.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node/npm files (if any)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Python files (if any)
+__pycache__/
+*.pyc
+.Python
+
+# Test files (if applicable)
+test/
+tests/
+*_test.go
+*_test.py
+*_test.js
