@@ -2,7 +2,7 @@ apiVersion: v2
 name: weaura-grafana
 description: WeAura vendorized Grafana OSS wrapper chart with tenant isolation
 type: application
-version: 0.2.0
+version: 0.2.1
 appVersion: "10.4.0"
 maintainers:
   - name: WeAura Tech Team
